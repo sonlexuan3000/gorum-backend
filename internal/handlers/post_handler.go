@@ -24,6 +24,8 @@ type UpdatePostRequest struct {
 
 func GetPostsByTopicID(c *gin.Context) {
     topicID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+    searchQuery := c.Query("q")
+
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid topic ID"})
         return
@@ -34,8 +36,8 @@ func GetPostsByTopicID(c *gin.Context) {
         c.JSON(http.StatusNotFound, gin.H{"error": "Topic not found"})
         return
     }
-    
-    posts, err := repository.GetPostsByTopicID(uint(topicID))
+
+    posts, err := repository.GetPostsByTopicID(uint(topicID), searchQuery)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
         return

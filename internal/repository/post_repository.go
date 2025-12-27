@@ -5,23 +5,27 @@ import (
     "backend/internal/models"
 )
 
-func GetPostsByTopicID(topicID uint) ([]models.Post, error) {
+func GetPostsByTopicID(topicID uint, searchQuery string) ([]models.Post, error) {
     var posts []models.Post
-    result := database.DB.
+    query := database.DB.Model(&models.Post{}).
         Preload("Creator").
         Where("topic_id = ?", topicID).
-        Order("created_at DESC").
-        Find(&posts)
+        Order("created_at DESC")
+    if searchQuery != "" {
+        searchTerm := "%" + searchQuery + "%"
+        query = query.Where("title ILIKE ? OR content ILIKE ?", searchTerm, searchTerm)
+    }
 
+    result := query.Find(&posts)
     if result.Error != nil {
         return nil, result.Error
     }
-    
+
     for i := range posts {
         voteCount, _ := GetVoteCount(posts[i].ID)
         posts[i].VoteCount = voteCount
     }
-    
+
     return posts, nil
 }
 
