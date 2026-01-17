@@ -3,7 +3,7 @@ package models
 import (
     "time"
     "gorm.io/gorm"
-	"golang.org/x/crypto/bcrypt"
+    "golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -11,9 +11,13 @@ type User struct {
     Username     string         `gorm:"unique;not null" json:"username" validate:"required,min=3,max=50"`
     Email        string         `gorm:"unique;not null" json:"email" validate:"required,email"` 
     PasswordHash string         `gorm:"not null" json:"-"` 
+    AvatarURL    string         `json:"avatar_url"`                    
+    Bio          string         `gorm:"type:text" json:"bio"`         
     CreatedAt    time.Time      `json:"created_at"`
     UpdatedAt    time.Time      `json:"updated_at"`
     DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+    PostsCount    int `gorm:"-" json:"posts_count"`    
+    CommentsCount int `gorm:"-" json:"comments_count"` 
 }
 
 func (u *User) SetPassword(password string) error {

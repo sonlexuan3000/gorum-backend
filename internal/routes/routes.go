@@ -11,7 +11,7 @@ func SetupRoutes(r *gin.Engine) {
     // Public routes
     auth := r.Group("/auth")
     {
-       	auth.POST("/signup", handlers.Signup) 
+        auth.POST("/signup", handlers.Signup) 
         auth.POST("/login", handlers.Login)   
     }
     
@@ -32,8 +32,8 @@ func SetupRoutes(r *gin.Engine) {
         api.POST("/posts", middleware.AuthRequired(), handlers.CreatePost)
         api.PUT("/posts/:id", middleware.AuthRequired(), handlers.UpdatePost)
         api.DELETE("/posts/:id", middleware.AuthRequired(), handlers.DeletePost)
-		api.POST("/posts/:id/vote", middleware.AuthRequired(), handlers.VotePost)
-		api.DELETE("/posts/:id/vote", middleware.AuthRequired(), handlers.UnvotePost)
+        api.POST("/posts/:id/vote", middleware.AuthRequired(), handlers.VotePost)
+        api.DELETE("/posts/:id/vote", middleware.AuthRequired(), handlers.UnvotePost)
         
         // Comments routes
         api.GET("/comments/:id", handlers.GetCommentByID)
@@ -42,6 +42,12 @@ func SetupRoutes(r *gin.Engine) {
         api.DELETE("/comments/:id", middleware.AuthRequired(), handlers.DeleteComment)
         
         // User routes
+        api.GET("/users/me", middleware.AuthRequired(), handlers.GetCurrentUser)
+        api.PUT("/users/me", middleware.AuthRequired(), handlers.UpdateProfile)
+        api.GET("/users/:identifier", handlers.GetUserProfile)
+        api.GET("/users/:identifier/posts", handlers.GetUserPosts)
+        api.GET("/users/:identifier/comments", handlers.GetUserComments)
+        
         api.GET("/me", middleware.AuthRequired(), handlers.GetMe)
     }
 }
