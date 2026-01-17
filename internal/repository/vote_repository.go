@@ -3,6 +3,7 @@ package repository
 import (
     "backend/internal/database"
     "backend/internal/models"
+    "gorm.io/gorm"
 )
 
 func GetVoteCount(postID uint) (int, error) {
@@ -24,7 +25,7 @@ func GetUserVote(postID, userID uint) (int, error) {
     err := database.DB.Where("post_id = ? AND user_id = ?", postID, userID).First(&vote).Error
     
     if err != nil {
-        if err.Error() == "record not found" {
+        if err == gorm.ErrRecordNotFound { 
             return 0, nil 
         }
         return 0, err
@@ -38,9 +39,11 @@ func UpsertVote(vote *models.Vote) error {
     err := database.DB.Where("post_id = ? AND user_id = ?", vote.PostID, vote.UserID).First(&existing).Error
     
     if err != nil {
-        return database.DB.Create(vote).Error
+        if err == gorm.ErrRecordNotFound { 
+            return database.DB.Create(vote).Error
+        }
+        return err 
     }
-    
     
     if existing.VoteType == vote.VoteType {
         return database.DB.Delete(&existing).Error

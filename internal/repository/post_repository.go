@@ -5,15 +5,25 @@ import (
     "backend/internal/models"
 )
 
-func GetPostsByTopicID(topicID uint, searchQuery string) ([]models.Post, error) {
+func GetPostsByTopicID(topicID uint, searchQuery string, sortBy string) ([]models.Post, error) {
     var posts []models.Post
+    
     query := database.DB.Model(&models.Post{}).
         Preload("Creator").
-        Where("topic_id = ?", topicID).
-        Order("created_at DESC")
+        Where("topic_id = ?", topicID)
+    
     if searchQuery != "" {
         searchTerm := "%" + searchQuery + "%"
         query = query.Where("title ILIKE ? OR content ILIKE ?", searchTerm, searchTerm)
+    }
+    
+    if sortBy == "votes" {
+        query = query.
+            Joins("LEFT JOIN (SELECT post_id, SUM(vote_type) as vote_sum FROM votes WHERE deleted_at IS NULL GROUP BY post_id) AS vote_counts ON posts.id = vote_counts.post_id").
+            Order("COALESCE(vote_counts.vote_sum, 0) DESC, posts.created_at DESC").
+            Select("posts.*")
+    } else {
+        query = query.Order("created_at DESC")
     }
 
     result := query.Find(&posts)
@@ -28,7 +38,6 @@ func GetPostsByTopicID(topicID uint, searchQuery string) ([]models.Post, error) 
 
     return posts, nil
 }
-
 func GetPostByID(id uint) (*models.Post, error) {
     var post models.Post
     result := database.DB.
