@@ -66,14 +66,15 @@ func CreateComment(c *gin.Context) {
         return
     }
     
-    _, err := repository.GetPostByID(req.PostID)
+    post, err := repository.GetPostByID(req.PostID)
     if err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
         return
     }
     
+    var parentComment *models.Comment
     if req.ParentID != nil {
-        _, err := repository.GetCommentByID(*req.ParentID)
+        parentComment, err = repository.GetCommentByID(*req.ParentID)
         if err != nil {
             c.JSON(http.StatusNotFound, gin.H{"error": "Parent comment not found"})
             return
@@ -92,6 +93,30 @@ func CreateComment(c *gin.Context) {
     if err := repository.CreateComment(&comment); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
         return
+    }
+
+    if req.ParentID != nil {
+        if parentComment != nil && parentComment.CreatedBy != userID {
+            notification := models.Notification{
+                UserID:    parentComment.CreatedBy,
+                ActorID:   userID,
+                Type:      models.NotificationReply,
+                PostID:    &post.ID,
+                CommentID: &comment.ID,
+            }
+            repository.CreateNotification(&notification)
+        }
+    } else {
+        if post.CreatedBy != userID {
+            notification := models.Notification{
+                UserID:    post.CreatedBy,
+                ActorID:   userID,
+                Type:      models.NotificationComment,
+                PostID:    &post.ID,
+                CommentID: &comment.ID,
+            }
+            repository.CreateNotification(&notification)
+        }
     }
     
     createdComment, _ := repository.GetCommentByID(comment.ID)

@@ -59,6 +59,7 @@ func Migrate() error {
         &models.Post{},
         &models.Comment{},
         &models.Vote{}, 
+        &models.Notification{},
     )
     
     if err != nil {

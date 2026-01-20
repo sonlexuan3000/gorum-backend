@@ -33,7 +33,7 @@ func main() {
         AllowOrigins: []string{
             "http://localhost:5173",           // Local dev
             //"https://*.vercel.app",            // Vercel preview
-            //os.Getenv("FRONTEND_URL"),         // Production frontend
+            os.Getenv("FRONTEND_URL"),         // Production frontend
         },
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},

@@ -48,6 +48,12 @@ func SetupRoutes(r *gin.Engine) {
         api.GET("/users/:identifier/posts", handlers.GetUserPosts)
         api.GET("/users/:identifier/comments", handlers.GetUserComments)
         
+        // Notifications routes
+        api.GET("/notifications", middleware.AuthRequired(), handlers.GetNotifications)
+        api.GET("/notifications/unread-count", middleware.AuthRequired(), handlers.GetUnreadCount)
+        api.PUT("/notifications/:id/read", middleware.AuthRequired(), handlers.MarkAsRead)
+        api.PUT("/notifications/mark-all-read", middleware.AuthRequired(), handlers.MarkAllAsRead)
+        
         api.GET("/me", middleware.AuthRequired(), handlers.GetMe)
     }
 }

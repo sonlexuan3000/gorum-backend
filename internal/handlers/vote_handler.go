@@ -28,7 +28,7 @@ func VotePost(c *gin.Context) {
         return
     }
     
-    _, err = repository.GetPostByID(uint(postID))
+    post, err := repository.GetPostByID(uint(postID))
     if err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
         return
@@ -45,6 +45,16 @@ func VotePost(c *gin.Context) {
     if err := repository.UpsertVote(&vote); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to vote"})
         return
+    }
+    
+    if req.VoteType == 1 && post.CreatedBy != userID {
+        notification := models.Notification{
+            UserID:  post.CreatedBy,
+            ActorID: userID,
+            Type:    models.NotificationVote,
+            PostID:  &post.ID,
+        }
+        repository.CreateNotification(&notification)
     }
     
     voteCount, _ := repository.GetVoteCount(uint(postID))
