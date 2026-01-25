@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-    log.Println("🚀 Starting Forum Backend Server...")
+    log.Println("Starting Forum Backend Server...")
     
     cfg, err := config.LoadConfig()
     if err != nil {
@@ -31,9 +31,8 @@ func main() {
     
     r.Use(cors.New(cors.Config{
         AllowOrigins: []string{
-            "http://localhost:5173",           // Local dev
-            //"https://*.vercel.app",            // Vercel preview
-            os.Getenv("FRONTEND_URL"),         // Production frontend
+            "http://localhost:5173",           // Change this to your frontend URL
+            os.Getenv("FRONTEND_URL"),         // Deployment frontend URL
         },
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
